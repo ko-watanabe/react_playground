@@ -5,19 +5,22 @@ import { Chart as ChartJS } from 'chart.js/auto';
 import './App.css';
 
 const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [inputId, setInputId] = useState('');
+  const [inputPassword, setInputPassword] = useState('');
   const [data, setData] = useState(null);
   const [chartData, setChartData] = useState(null);
   const [scatterData, setScatterData] = useState(null);
-  const [bubbleData, setBubbleData] = useState(null); // バブルチャート用のデータ
-  const [stackedBarData, setStackedBarData] = useState(null); // 積み上げ棒グラフ用のデータ
-  const [radarData, setRadarData] = useState(null); // レーダーチャート用データ
-  const [polarData, setPolarData] = useState(null); // ポーラエリアチャート用データ
+  const [bubbleData, setBubbleData] = useState(null);
+  const [stackedBarData, setStackedBarData] = useState(null);
+  const [radarData, setRadarData] = useState(null);
+  const [polarData, setPolarData] = useState(null);
 
   const handleCSVData = (csvData) => {
     setData(csvData);
 
-    const labels = csvData.slice(1).map(row => row[0]); // 1列目をラベルとして使用
-    const values = csvData.slice(1).map(row => parseFloat(row[1])); // 2列目を数値データとして使用
+    const labels = csvData.slice(1).map(row => row[0]);
+    const values = csvData.slice(1).map(row => parseFloat(row[1]));
 
     setChartData({
       labels: labels,
@@ -48,7 +51,6 @@ const App = () => {
       ]
     });
 
-    // 散布図のデータ（2列目と3列目のデータを使用）
     setScatterData({
       datasets: [
         {
@@ -61,7 +63,6 @@ const App = () => {
       ]
     });
 
-    // バブルチャート用のデータ（3つの値が必要）
     setBubbleData({
       datasets: [
         {
@@ -69,7 +70,7 @@ const App = () => {
           data: csvData.slice(1).map(row => ({
             x: parseFloat(row[1]),
             y: parseFloat(row[2]),
-            r: parseFloat(row[3]) // バブルのサイズを表す
+            r: parseFloat(row[3])
           })),
           backgroundColor: 'rgba(255, 159, 64, 0.5)',
           borderColor: 'rgba(255, 159, 64, 1)',
@@ -77,7 +78,6 @@ const App = () => {
       ]
     });
 
-    // 積み上げ棒グラフ用データ
     setStackedBarData({
       labels: labels,
       datasets: [
@@ -93,7 +93,7 @@ const App = () => {
         }
       ]
     });
-    // レーダーチャート用データ
+
     setRadarData({
       labels: labels,
       datasets: [
@@ -107,7 +107,6 @@ const App = () => {
       ]
     });
 
-    // ポーラエリアチャート用データ
     setPolarData({
       labels: labels,
       datasets: [
@@ -127,17 +126,60 @@ const App = () => {
     });
   };
 
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const envId = process.env.REACT_APP_ID;
+    const envPassword = process.env.REACT_APP_PASSWORD;
+
+    if (inputId === envId && inputPassword === envPassword) {
+      setIsLoggedIn(true);
+    } else {
+      alert('IDまたはパスワードが間違っています。');
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="container">
+        <h2>ログイン</h2>
+        <form onSubmit={handleLogin} className="form">
+          <div className="formGroup">
+            <label htmlFor="id">ID:</label>
+            <input
+              type="text"
+              id="id"
+              value={inputId}
+              onChange={(e) => setInputId(e.target.value)}
+              required
+              className="input"
+            />
+          </div>
+          <div className="formGroup">
+            <label htmlFor="password">パスワード:</label>
+            <input
+              type="password"
+              id="password"
+              value={inputPassword}
+              onChange={(e) => setInputPassword(e.target.value)}
+              required
+              className="input"
+            />
+          </div>
+          <button type="submit" className="button">ログイン</button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div style={{ textAlign: 'center' }}>
       <h1>CSV Import and Visualization</h1>
 
-      {/* CSVリーダー */}
       <CSVReader
         onFileLoaded={handleCSVData}
         inputStyle={{ color: 'red' }}
       />
 
-      {/* CSVデータを可視化 */}
       {chartData && (
         <div className="chart-container">
           <div className="chart-item">
