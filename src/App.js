@@ -1,32 +1,153 @@
 import React, { useState } from 'react';
 import CSVReader from 'react-csv-reader';
 import { Line, Bar, Pie, Radar, PolarArea, Scatter, Bubble, Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS } from 'chart.js/auto';
+import * as XLSX from 'xlsx';
 import './App.css';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [inputId, setInputId] = useState('');
   const [inputPassword, setInputPassword] = useState('');
-  const [data, setData] = useState(null);
   const [chartData, setChartData] = useState(null);
-  const [scatterData, setScatterData] = useState(null);
-  const [bubbleData, setBubbleData] = useState(null);
-  const [stackedBarData, setStackedBarData] = useState(null);
-  const [radarData, setRadarData] = useState(null);
-  const [polarData, setPolarData] = useState(null);
+  const [workbook, setWorkbook] = useState(null);
+  const [sheetNames, setSheetNames] = useState([]);
+  const [selectedSheet, setSelectedSheet] = useState('');
 
-  const handleCSVData = (csvData) => {
-    setData(csvData);
+  const handleExcelData = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
 
-    const labels = csvData.slice(1).map(row => row[0]);
-    const values = csvData.slice(1).map(row => parseFloat(row[1]));
+      setWorkbook(workbook);
+      setSheetNames(workbook.SheetNames);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  //   setData(csvData);
+
+  //   const labels = csvData.slice(1).map(row => row[0]);
+  //   const values = csvData.slice(1).map(row => parseFloat(row[1]));
+
+  //   setChartData({
+  //     labels: labels,
+  //     datasets: [
+  //       {
+  //         label: 'CSV Data',
+  //         data: values,
+  //         backgroundColor: [
+  //           'rgba(255, 99, 132, 0.2)',
+  //           'rgba(54, 162, 235, 0.2)',
+  //           'rgba(255, 206, 86, 0.2)',
+  //           'rgba(75, 192, 192, 0.2)',
+  //           'rgba(153, 102, 255, 0.2)',
+  //           'rgba(255, 159, 64, 0.2)',
+  //           'rgba(255, 99, 132, 0.2)'
+  //         ],
+  //         borderColor: [
+  //           'rgba(255, 99, 132, 1)',
+  //           'rgba(54, 162, 235, 1)',
+  //           'rgba(255, 206, 86, 1)',
+  //           'rgba(75, 192, 192, 1)',
+  //           'rgba(153, 102, 255, 1)',
+  //           'rgba(255, 159, 64, 1)',
+  //           'rgba(255, 99, 132, 1)'
+  //         ],
+  //         borderWidth: 1,
+  //       }
+  //     ]
+  //   });
+
+  //   setScatterData({
+  //     datasets: [
+  //       {
+  //         label: 'Scatter Plot Data',
+  //         data: csvData.slice(1).map(row => ({ x: parseFloat(row[1]), y: parseFloat(row[2]) })),
+  //         backgroundColor: 'rgba(75, 192, 192, 0.5)',
+  //         borderColor: 'rgba(75, 192, 192, 1)',
+  //         pointRadius: 5,
+  //       }
+  //     ]
+  //   });
+
+  //   setBubbleData({
+  //     datasets: [
+  //       {
+  //         label: 'Bubble Chart Data',
+  //         data: csvData.slice(1).map(row => ({
+  //           x: parseFloat(row[1]),
+  //           y: parseFloat(row[2]),
+  //           r: parseFloat(row[3])
+  //         })),
+  //         backgroundColor: 'rgba(255, 159, 64, 0.5)',
+  //         borderColor: 'rgba(255, 159, 64, 1)',
+  //       }
+  //     ]
+  //   });
+
+  //   setStackedBarData({
+  //     labels: labels,
+  //     datasets: [
+  //       {
+  //         label: 'Dataset 1',
+  //         data: csvData.slice(1).map(row => parseFloat(row[1])),
+  //         backgroundColor: 'rgba(255, 99, 132, 0.5)',
+  //       },
+  //       {
+  //         label: 'Dataset 2',
+  //         data: csvData.slice(1).map(row => parseFloat(row[2])),
+  //         backgroundColor: 'rgba(54, 162, 235, 0.5)',
+  //       }
+  //     ]
+  //   });
+
+  //   setRadarData({
+  //     labels: labels,
+  //     datasets: [
+  //       {
+  //         label: 'Radar Chart Data',
+  //         data: values,
+  //         backgroundColor: 'rgba(153, 102, 255, 0.5)',
+  //         borderColor: 'rgba(153, 102, 255, 1)',
+  //         borderWidth: 2,
+  //       }
+  //     ]
+  //   });
+
+  //   setPolarData({
+  //     labels: labels,
+  //     datasets: [
+  //       {
+  //         label: 'Polar Area Chart Data',
+  //         data: values,
+  //         backgroundColor: [
+  //           'rgba(255, 99, 132, 0.5)',
+  //           'rgba(54, 162, 235, 0.5)',
+  //           'rgba(255, 206, 86, 0.5)',
+  //           'rgba(75, 192, 192, 0.5)',
+  //           'rgba(153, 102, 255, 0.5)',
+  //           'rgba(255, 159, 64, 0.5)'
+  //         ]
+  //       }
+  //     ]
+  //   });
+  // };
+
+  const handleSheetSelection = (sheetName) => {
+    setSelectedSheet(sheetName);
+
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    const labels = jsonData.map(row => row['Label']); // ラベルを設定
+    const values = jsonData.map(row => parseFloat(row['Value'])); // 値を設定
 
     setChartData({
       labels: labels,
       datasets: [
         {
-          label: 'CSV Data',
+          label: 'Excel Data',
           data: values,
           backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
@@ -47,80 +168,6 @@ const App = () => {
             'rgba(255, 99, 132, 1)'
           ],
           borderWidth: 1,
-        }
-      ]
-    });
-
-    setScatterData({
-      datasets: [
-        {
-          label: 'Scatter Plot Data',
-          data: csvData.slice(1).map(row => ({ x: parseFloat(row[1]), y: parseFloat(row[2]) })),
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          pointRadius: 5,
-        }
-      ]
-    });
-
-    setBubbleData({
-      datasets: [
-        {
-          label: 'Bubble Chart Data',
-          data: csvData.slice(1).map(row => ({
-            x: parseFloat(row[1]),
-            y: parseFloat(row[2]),
-            r: parseFloat(row[3])
-          })),
-          backgroundColor: 'rgba(255, 159, 64, 0.5)',
-          borderColor: 'rgba(255, 159, 64, 1)',
-        }
-      ]
-    });
-
-    setStackedBarData({
-      labels: labels,
-      datasets: [
-        {
-          label: 'Dataset 1',
-          data: csvData.slice(1).map(row => parseFloat(row[1])),
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        },
-        {
-          label: 'Dataset 2',
-          data: csvData.slice(1).map(row => parseFloat(row[2])),
-          backgroundColor: 'rgba(54, 162, 235, 0.5)',
-        }
-      ]
-    });
-
-    setRadarData({
-      labels: labels,
-      datasets: [
-        {
-          label: 'Radar Chart Data',
-          data: values,
-          backgroundColor: 'rgba(153, 102, 255, 0.5)',
-          borderColor: 'rgba(153, 102, 255, 1)',
-          borderWidth: 2,
-        }
-      ]
-    });
-
-    setPolarData({
-      labels: labels,
-      datasets: [
-        {
-          label: 'Polar Area Chart Data',
-          data: values,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.5)',
-            'rgba(54, 162, 235, 0.5)',
-            'rgba(255, 206, 86, 0.5)',
-            'rgba(75, 192, 192, 0.5)',
-            'rgba(153, 102, 255, 0.5)',
-            'rgba(255, 159, 64, 0.5)'
-          ]
         }
       ]
     });
@@ -175,12 +222,32 @@ const App = () => {
     <div style={{ textAlign: 'center' }}>
       <h1>CSV Import and Visualization</h1>
 
-      <CSVReader
-        onFileLoaded={handleCSVData}
-        inputStyle={{ color: 'red' }}
-      />
+      <input type="file" accept=".xlsx, .xls" onChange={handleExcelData} />
+
+      {sheetNames.length > 0 && (
+        <div style={{ marginTop: '20px' }}>
+          <label htmlFor="sheet-select">Select Sheet: </label>
+          <select
+            id="sheet-select"
+            value={selectedSheet}
+            onChange={(e) => handleSheetSelection(e.target.value)}
+          >
+            {sheetNames.map(sheetName => (
+              <option key={sheetName} value={sheetName}>
+                {sheetName}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {chartData && (
+        <div className="chart-container">
+          <h2>{selectedSheet} - Line Chart</h2>
+          <Line data={chartData} />
+        </div>
+      )}
+      {/* {chartData && (
         <div className="chart-container">
           <div className="chart-item">
             <h2>Line Chart</h2>
@@ -240,7 +307,7 @@ const App = () => {
             )}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
