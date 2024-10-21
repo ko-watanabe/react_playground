@@ -163,7 +163,7 @@ const App = () => {
         <h2>ログイン</h2>
         <form onSubmit={handleLogin} className="form">
           <div className="formGroup">
-            <label htmlFor="id">ID:</label>
+            <label htmlFor="id">ID: </label>
             <input
               type="text"
               id="id"
@@ -174,7 +174,7 @@ const App = () => {
             />
           </div>
           <div className="formGroup">
-            <label htmlFor="password">パスワード:</label>
+            <label htmlFor="password">パスワード: </label>
             <input
               type="password"
               id="password"

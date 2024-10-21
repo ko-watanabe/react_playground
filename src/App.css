@@ -9,6 +9,10 @@ body {
   align-items: center;
 }
 
+.container {
+  line-height: 1.5em;
+}
+
 .chart-container {
   display: flex;
   justify-content: space-around;
@@ -41,6 +45,10 @@ body {
 .login-form {
   display: flex;
   flex-direction: column;
+}
+
+.form {
+  line-height: 2em;
 }
 
 .form-title {
