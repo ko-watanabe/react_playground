@@ -12,6 +12,8 @@ const App = () => {
   const [workbook, setWorkbook] = useState(null);
   const [sheetNames, setSheetNames] = useState([]);
   const [selectedSheet, setSelectedSheet] = useState('');
+  const [tableData, setTableData] = useState([]);
+
 
   const handleExcelData = (e) => {
     const file = e.target.files[0];
@@ -138,39 +140,9 @@ const App = () => {
     setSelectedSheet(sheetName);
 
     const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-    const labels = jsonData.map(row => row['Label']); // ラベルを設定
-    const values = jsonData.map(row => parseFloat(row['Value'])); // 値を設定
-
-    setChartData({
-      labels: labels,
-      datasets: [
-        {
-          label: 'Excel Data',
-          data: values,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)',
-            'rgba(255, 99, 132, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(255, 99, 132, 1)'
-          ],
-          borderWidth: 1,
-        }
-      ]
-    });
+    const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    setSelectedSheet(sheetName);
+    setTableData(sheetData);
   };
 
   const handleLogin = (e) => {
@@ -221,7 +193,6 @@ const App = () => {
   return (
     <div style={{ textAlign: 'center' }}>
       <h1>CSV Import and Visualization</h1>
-
       <input type="file" accept=".xlsx, .xls" onChange={handleExcelData} />
 
       {sheetNames.length > 0 && (
@@ -241,12 +212,36 @@ const App = () => {
         </div>
       )}
 
-      {chartData && (
+      {tableData.length > 0 && (
+        <div>
+          <h2>Sheet: {selectedSheet}</h2>
+          <table className="table">
+            <thead>
+              <tr>
+                {tableData[0].map((header, i) => (
+                  <th key={i}>{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.slice(1).map((row, i) => (
+                <tr key={i}>
+                  {row.map((cell, j) => (
+                    <td key={j}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* {chartData && (
         <div className="chart-container">
           <h2>{selectedSheet} - Line Chart</h2>
           <Line data={chartData} />
         </div>
-      )}
+      )} */}
       {/* {chartData && (
         <div className="chart-container">
           <div className="chart-item">
